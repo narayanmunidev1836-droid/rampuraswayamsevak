@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {cookies} from 'next/headers';import {verifyAdminToken} from '../../../../lib/auth';import {connectDB} from '../../../../lib/db';import Submission from '../../../../lib/model';
+export async function GET(){const token=cookies().get('admin_token')?.value;if(!(await verifyAdminToken(token||'')))return NextResponse.json({error:'Unauthorized'},{status:401});await connectDB();const rows=await Submission.find().sort({createdAt:-1}).lean();return NextResponse.json(rows);}

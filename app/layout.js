@@ -1,0 +1,3 @@
+import './globals.css';
+export const metadata={title:'સ્વયંસેવક ફોર્મ | ધોલેરાધામ',description:'સ્વયંસેવક ફોર્મ - ધોલેરાધામ દ્વિશતાબ્દી મહોત્સવ'};
+export default function RootLayout({children}){return <html lang="gu"><head><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous"/><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/></head><body>{children}</body></html>}

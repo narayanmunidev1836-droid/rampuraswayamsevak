@@ -1,0 +1,1 @@
+{"name":"rampura-swayamsevak-form","version":"1.0.0","private":true,"scripts":{"dev":"next dev","build":"next build","start":"next start","lint":"next lint"},"dependencies":{"jose":"^5.9.6","mongoose":"^8.7.0","next":"14.2.3","react":"18.3.1","react-dom":"18.3.1"}}
