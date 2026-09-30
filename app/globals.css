@@ -420,7 +420,13 @@ body {
 
 .success-card p {
   color: #4a7a58;
-  margin-bottom: 24px;
+  margin: 0 auto 4px;
+  max-width: 550px;
+  line-height: 1.8;
+}
+
+.success-card p:last-of-type {
+  margin-bottom: 28px;
 }
 
 .submit-where {

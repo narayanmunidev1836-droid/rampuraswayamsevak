@@ -41,15 +41,10 @@ export default function Home() {
         <div className="success-card">
           <div className="success-icon">🙏</div>
           <h2>જય શ્રી સ્વામિનારાયણ!</h2>
-          <p>આપની માહિતી સફળતાપૂર્વક નોંધાઈ ગઈ છે. આપની સેવા ભાવના માટે ખૂબ ખૂબ આભાર.</p>
-          <div className="submit-where">
-            <div className="submit-where-title">📌 ફોર્મ ક્યાં પહોંચાડવું?</div>
-            <div>ભરેલું ફોર્મ આ પૈકાની ઓફિસમાં અચૂક પહોંચાડવું —</div>
-            <ul>
-              <li><strong>શ્રી સ્વામિનારાયણ સંસ્કારધામ ગુરુકુલ, ધ્રાંગધ્રા</strong></li>
-              <li><strong>શ્રી સ્વામિનારાયણ મંદિર, રામપુરા, સુરત</strong></li>
-            </ul>
-          </div>
+          <p>આપની સ્વયંસેવક તરીકેની નોંધણી સફળતાપૂર્વક પૂર્ણ થઈ ગઈ છે.</p>
+          <p>ધોલેરાધામ દ્વિશતાબ્દી મહોત્સવમાં સેવા આપવા માટે આગળ આવ્યા બદલ આપનો હાર્દિક આભાર.</p>
+          <p>સેવા સંબંધિત વધુ માહિતી અને સૂચનાઓ આપને યોગ્ય સમયે આપવામાં આવશે.</p>
+          <p><strong>આપની સેવા ભાવનાને વંદન. 🙏</strong></p>
           <button className="btn primary" style={{maxWidth:'280px',margin:'0 auto'}} onClick={() => { setF(initial); setDone(false); }}>બીજું ફોર્મ ભરવું</button>
         </div>
       </div>
