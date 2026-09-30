@@ -10,6 +10,7 @@ export default function Admin() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -27,6 +28,28 @@ export default function Admin() {
 
   function doHome() {
     router.push('/admin');
+  }
+
+  async function doExport() {
+    setExporting(true);
+    try {
+      const r = await fetch('/api/admin/export');
+      if (r.status === 401) { setLogged(false); return; }
+      if (!r.ok) throw new Error('export failed');
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `swayamsevak-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError('Excel export માં તકલી આવી. ફરી પ્રયત્ન કરો.');
+    } finally {
+      setExporting(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -80,6 +103,9 @@ export default function Admin() {
           <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>ધોલેરાધામ દ્વિશતાબ્દી મહોત્સવ</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button onClick={doExport} disabled={exporting || rows.length === 0} title="બધા રેકોર્ડ સાથે Excel (.xlsx) ડાઉનલોડ કરો" style={{ background: '#fff', border: 'none', color: '#8e1f0a', borderRadius: '10px', padding: '9px 20px', cursor: exporting || rows.length === 0 ? 'not-allowed' : 'pointer', opacity: exporting || rows.length === 0 ? 0.6 : 1, fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}>
+          {exporting ? '⏳ Excel Export' : '📊 Excel Export'}
+        </button>
         <button onClick={doHome} style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)', color: '#fff', borderRadius: '10px', padding: '9px 20px', cursor: 'pointer', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           🔄 Home
         </button>
@@ -109,6 +135,8 @@ export default function Admin() {
             </div>
           ))}
         </div>
+
+        {error && <div className="error" style={{ marginBottom: '16px' }}>{error}</div>}
 
         {/* Search */}
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e8ddd6', padding: '14px 18px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 2px 8px rgba(80,30,10,0.05)' }}>
