@@ -198,12 +198,7 @@ export default function Home() {
 
             {/* ─── Error ─── */}
             {error && <div className="error">{error}</div>}
-
-            {/* ─── Note ─── */}
-            <div className="form-note">
-              <strong>📌 નોંધ :</strong> આ સ્વયંસેવક ફોર્મ વિગતવાર ભરીને સંચાલકો અથવા પૂ. સંતો દ્વારા શ્રી સ્વામિનારાયણ મંદિર, ધોળેરાધામ, કોઠારીશ્રીની ઓફિસમાં અચૂક પહોંચાડશો.
-            </div>
-
+            
             <button className="btn primary" disabled={loading}>
               {loading ? '⏳ સબમિટ થઈ રહ્યું છે...' : '✓ ફોર્મ સબમિટ કરો'}
             </button>
