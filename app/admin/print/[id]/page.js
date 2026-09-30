@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function PrintPage({ params }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   const autoPrint = searchParams.get('autoprint') === '1';
@@ -48,6 +49,20 @@ export default function PrintPage({ params }) {
           onClick={() => window.print()}
         >
           🖨 Print
+        </button>
+        <button
+          className="print-btn"
+          style={{ marginLeft: '10px', background: '#2a5c38' }}
+          onClick={() => router.push(`/admin/edit/${params.id}`)}
+        >
+          ✏️ Edit
+        </button>
+        <button
+          className="print-btn"
+          style={{ marginLeft: '10px', background: '#8a6a5a' }}
+          onClick={() => router.push('/admin')}
+        >
+          ← Admin
         </button>
       </div>
 

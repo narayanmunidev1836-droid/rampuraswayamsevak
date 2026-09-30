@@ -11,6 +11,9 @@ export default function Admin() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [target, setTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState('');
 
   async function load() {
     setLoading(true);
@@ -24,10 +27,6 @@ export default function Admin() {
   function doLogout() {
     setLogged(false);
     router.push('/');
-  }
-
-  function doHome() {
-    router.push('/admin');
   }
 
   async function doExport() {
@@ -53,6 +52,32 @@ export default function Admin() {
   }
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(''), 3000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  async function doDelete() {
+    if (!target || deleting) return;
+    setDeleting(true);
+    const row = target;
+    try {
+      const r = await fetch(`/api/submissions/${row._id}`, { method: 'DELETE' });
+      if (r.status === 401) { setLogged(false); return; }
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'રેકોર્ડ કાઢી નાખવામાં સમસ્યા આવી.');
+      setRows(prev => prev.filter(x => x._id !== row._id));
+      setTarget(null);
+      setToast(`✅ ${row.surname} ${row.name} નો રેકોર્ડ કાઢી નાખ્યો છે.`);
+    } catch (e) {
+      setError(e.message);
+      setTarget(null);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function doLogin(e) {
     e.preventDefault();
@@ -106,14 +131,11 @@ export default function Admin() {
         <button onClick={doExport} disabled={exporting || rows.length === 0} title="બધા રેકોર્ડ સાથે Excel (.xlsx) ડાઉનલોડ કરો" style={{ background: '#fff', border: 'none', color: '#8e1f0a', borderRadius: '10px', padding: '9px 20px', cursor: exporting || rows.length === 0 ? 'not-allowed' : 'pointer', opacity: exporting || rows.length === 0 ? 0.6 : 1, fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}>
           {exporting ? '⏳ Excel Export' : '📊 Excel Export'}
         </button>
-        <button onClick={doHome} style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)', color: '#fff', borderRadius: '10px', padding: '9px 20px', cursor: 'pointer', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          🔄 Home
-        </button>
         <button onClick={load} style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)', color: '#fff', borderRadius: '10px', padding: '9px 20px', cursor: 'pointer', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           🔄 Refresh
         </button>
         <button onClick={doLogout} style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)', color: '#fff', borderRadius: '10px', padding: '9px 20px', cursor: 'pointer', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          🔄 Logout
+          🚪 Logout
         </button>
         </div>
       </div>
@@ -201,18 +223,32 @@ export default function Admin() {
                         <span style={{ fontSize: '13px', color: '#5a3a28' }}>{r.departments?.join(', ') || '—'}</span>
                       </td>
                       <td style={{ padding: '12px 16px' }}>
-                        <div style={{ display: 'flex', gap: '6px' }}>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                           <button
                             onClick={() => window.open(`/admin/print/${r._id}?autoprint=1`, '_blank')}
                             style={{ background: 'linear-gradient(135deg,#8e1f0a,#c4511f)', color: '#fff', border: 'none', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontSize: '13px', whiteSpace: 'nowrap', boxShadow: '0 2px 8px rgba(142,31,10,0.25)' }}
                           >
-                            🖨 Print
+                            🖨
                           </button>
                           <button
                             onClick={() => router.push(`/admin/print/${r._id}`)}
                             style={{ background: '#f0e8e4', color: '#8e1f0a', border: '1.5px solid #e0c8be', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontSize: '13px', whiteSpace: 'nowrap' }}
                           >
-                            👁 View
+                            👁
+                          </button>
+                          <button
+                            onClick={() => router.push(`/admin/edit/${r._id}`)}
+                            title="આ ફોર્મમાં ફેરફાર કરો"
+                            style={{ background: '#e8f1ea', color: '#2a5c38', border: '1.5px solid #c3ddc9', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontSize: '13px', whiteSpace: 'nowrap' }}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => setTarget(r)}
+                            title="આ રેકોર્ડ કાઢી નાખો"
+                            style={{ background: '#fdeaea', color: '#a52020', border: '1.5px solid #f2c6c6', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontSize: '13px', whiteSpace: 'nowrap' }}
+                          >
+                            🗑 
                           </button>
                         </div>
                       </td>
@@ -225,6 +261,56 @@ export default function Admin() {
         </div>
 
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: '#2a5c38', color: '#fff', padding: '12px 22px', borderRadius: '10px', fontWeight: 700, fontSize: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.25)', zIndex: 60 }}>
+          {toast}
+        </div>
+      )}
+
+      {/* Delete confirm modal */}
+      {target && (
+        <div
+          onClick={() => !deleting && setTarget(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(47,33,28,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 70 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: '#fff', borderRadius: '16px', maxWidth: '420px', width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+          >
+            <div style={{ background: 'linear-gradient(135deg,#a52020,#d94a2a)', padding: '20px 24px', color: '#fff' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>🗑 રેકોર્ડ કાઢી નાખવું છે?</h2>
+            </div>
+            <div style={{ padding: '24px' }}>
+              <p style={{ margin: '0 0 8px', color: '#2f211c', fontSize: '15px', lineHeight: 1.6 }}>
+                <strong>{target.surname} {target.name}</strong>
+              </p>
+              <p style={{ margin: 0, color: '#8a6a5a', fontSize: '13px', lineHeight: 1.6 }}>
+                મો. નં.: {target.mobile} · ગામ: {target.village}
+              </p>
+              <div className="error" style={{ marginTop: '16px' }}>આ કામ પાછું હરગામ કરી શકાશો નહીં — ફોટો સહિત બધો રેકોર્ડ કાયમી રીતે કાઢી નાખશે.</div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '22px' }}>
+                <button
+                  onClick={doDelete}
+                  disabled={deleting}
+                  style={{ flex: 1, background: '#a52020', color: '#fff', border: 'none', borderRadius: '10px', padding: '11px 16px', cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.6 : 1, fontWeight: 700, fontSize: '14px' }}
+                >
+                  {deleting ? '⏳ કાઢી રહ્યા છીએ...' : 'હા, કાઢી નાખો'}
+                </button>
+                <button
+                  onClick={() => setTarget(null)}
+                  disabled={deleting}
+                  style={{ flex: 1, background: '#f0e8e4', color: '#5a3a28', border: '1.5px solid #e0c8be', borderRadius: '10px', padding: '11px 16px', cursor: 'pointer', fontWeight: 700, fontSize: '14px' }}
+                >
+                  ના, રહવા દો
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
