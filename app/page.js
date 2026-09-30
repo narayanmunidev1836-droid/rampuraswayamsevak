@@ -1,5 +1,10 @@
 'use client';
-import { useState } from 'react'; import { departments, sevaTypes, shirtSizes } from '../lib/constants'; import DateRangePicker from './DateRangePicker';
+import { useState } from 'react'; import { departments, sevaTypes, shirtSizes, eventYear, eventMonth, eventStartDay, eventEndDay } from '../lib/constants'; import DateRangePicker from './DateRangePicker';
+const GU_MONTH_FULL = ['જાન્યુઆરી', 'ફેબ્રુઆરી', 'માર્ચ', 'એપ્રિલ', 'મે', 'જૂન', 'જુલાઈ', 'ઓગસ્ટ', 'સપ્ટેમ્બર', 'ઓક્ટોબર', 'નવેમ્બર', 'ડિસેમ્બર'];
+const GU_DIGITS = ['૦', '૧', '૨', '૩', '૪', '૫', '૬', '૭', '૮', '૯'];
+const toGuNum = n => String(n).split('').map(c => GU_DIGITS[Number(c)]).join('');
+const MONTH_NAME = GU_MONTH_FULL[eventMonth];
+const EVENT_RANGE = `${toGuNum(eventStartDay)} થી ${toGuNum(eventEndDay)} ${MONTH_NAME} ${toGuNum(eventYear)}`;
 const initial = { surname: '', name: '', fatherName: '', village: '', address: '', mobile: '', age: '', shirtSize: '', fromDate: '', toDate: '', departments: [], otherDepartment: '', sevaType: [], santName: '', santMobile: '', photoData: '' };
 export default function Home() {
   const [f, setF] = useState(initial),
@@ -35,8 +40,16 @@ export default function Home() {
       <div className="card">
         <div className="success-card">
           <div className="success-icon">🙏</div>
-          <h2>જય સ્વામિનારાયણ!</h2>
+          <h2>જય શ્રી સ્વામિનારાયણ!</h2>
           <p>આપની માહિતી સફળતાપૂર્વક નોંધાઈ ગઈ છે. આપની સેવા ભાવના માટે ખૂબ ખૂબ આભાર.</p>
+          <div className="submit-where">
+            <div className="submit-where-title">📌 ફોર્મ ક્યાં પહોંચાડવું?</div>
+            <div>ભરેલું ફોર્મ આ પૈકાની ઓફિસમાં અચૂક પહોંચાડવું —</div>
+            <ul>
+              <li><strong>શ્રી સ્વામિનારાયણ સંસ્કારધામ ગુરુકુલ, ધ્રાંગધ્રા</strong></li>
+              <li><strong>શ્રી સ્વામિનારાયણ મંદિર, રામપુરા, સુરત</strong></li>
+            </ul>
+          </div>
           <button className="btn primary" style={{maxWidth:'280px',margin:'0 auto'}} onClick={() => { setF(initial); setDone(false); }}>બીજું ફોર્મ ભરવું</button>
         </div>
       </div>
@@ -47,7 +60,7 @@ export default function Home() {
     <main className="container">
       <div className="form-header">
         <h1>🕉️ સ્વયંસેવક ફોર્મ</h1>
-        <p className="subtitle">ધોલેરાધામ દ્વિશતાબ્દી મહોત્સવ — ૨૩ થી ૩૧ ડિસેમ્બર ૨૦૨૫</p>
+        <p className="subtitle">ધોલેરાધામ દ્વિશતાબ્દી મહોત્સવ — {EVENT_RANGE}</p>
       </div>
 
       <div className="card">
@@ -100,7 +113,8 @@ export default function Home() {
                 onChange={(from, to) => { set('fromDate', from); set('toDate', to); }}
               />
               <div className="info-box" style={{marginTop:'14px'}}>
-                <strong>ઉત્સવ પ્રારંભ:</strong> ૨૩ ડિસેમ્બર ૨૦૨૫ — <strong>સમાપ્તિ:</strong> ૩૧ ડિસેમ્બર ૨૦૨૫<br />
+                <strong>ઉત્સવ પ્રારંભ:</strong> {toGuNum(eventStartDay)} {MONTH_NAME} {toGuNum(eventYear)} — <strong>સમાપ્તિ:</strong> {toGuNum(eventEndDay)} {MONTH_NAME} {toGuNum(eventYear)}<br />
+                ✅ સેવાની તારીખ ફક્ત <strong>ડિસેમ્બર ૨૦૨૬</strong> માટે જ પસંદ કરી શકાય.<br />
                 ✅ ઉત્સવમાં ઓછામાં ઓછા <strong>૫ દિવસ</strong> સેવા આપવી જરૂરી છે.<br />
                 ✅ ભાઈઓ તથા બહેનો ભક્તો સેવાનો લાભ લઈ શકશે.
               </div>

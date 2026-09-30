@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { eventYear, eventMonth, isSelectableMonth, lastSelectableDate } from '../lib/constants';
 
-const MONTHS_GU = ['જાન્યુ', 'ફેબ્રુ', 'માર્ચ', 'એપ્રિલ', 'મે', 'જૂન', 'જુલાઈ', 'ઓગ', 'સપ્ટે', 'ઓક્ટો', 'નવે', 'ડિસે'];
 const MONTHS_FULL_GU = ['જાન્યુઆરી', 'ફેબ્રુઆરી', 'માર્ચ', 'એપ્રિલ', 'મે', 'જૂન', 'જુલાઈ', 'ઓગસ્ટ', 'સપ્ટેમ્બર', 'ઓક્ટોબર', 'નવેમ્બર', 'ડિસેમ્બર'];
 const DAYS_GU = ['રવિ', 'સોમ', 'મંગળ', 'બુધ', 'ગુરુ', 'શુક્ર', 'શનિ'];
 const MIN_DAYS = 5;
@@ -23,6 +23,10 @@ function sameDay(a, b) {
   return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
+function isEventDate(date) {
+  return !!date && isSelectableMonth(date.getFullYear(), date.getMonth());
+}
+
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }
@@ -37,10 +41,7 @@ function buildCalendarDays(year, month) {
 }
 
 export default function DateRangePicker({ fromDate, toDate, onChange }) {
-  const today = new Date();
   const [open, setOpen] = useState(false);
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [hoverDate, setHoverDate] = useState(null);
   const [selecting, setSelecting] = useState('from'); // 'from' | 'to'
   const ref = useRef(null);
@@ -58,7 +59,7 @@ export default function DateRangePicker({ fromDate, toDate, onChange }) {
   }, []);
 
   function handleDayClick(date) {
-    if (!date) return;
+    if (!isEventDate(date)) return;
     if (selecting === 'from' || !from) {
       onChange(toYMD(date), '');
       setSelecting('to');
@@ -72,9 +73,11 @@ export default function DateRangePicker({ fromDate, toDate, onChange }) {
       }
       const diffDays = Math.round((date - from) / (1000 * 60 * 60 * 24));
       if (diffDays < MIN_DAYS - 1) {
-        // Auto-extend to minimum
+        // Auto-extend to minimum, never past the last selectable day
         const minTo = new Date(from);
         minTo.setDate(minTo.getDate() + MIN_DAYS - 1);
+        const lastDay = lastSelectableDate();
+        if (minTo > lastDay) minTo.setTime(lastDay.getTime());
         onChange(toYMD(from), toYMD(minTo));
       } else {
         onChange(toYMD(from), toYMD(date));
@@ -97,23 +100,7 @@ export default function DateRangePicker({ fromDate, toDate, onChange }) {
   function isStart(date) { return date && from && sameDay(date, from); }
   function isEnd(date) { return date && to && sameDay(date, to); }
 
-  function prevMonth() {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
-    else setViewMonth(m => m - 1);
-  }
-
-  function nextMonth() {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
-    else setViewMonth(m => m + 1);
-  }
-
-  const cells = buildCalendarDays(viewYear, viewMonth);
-
-  function displayText() {
-    if (!fromDate && !toDate) return 'તારીખ પસંદ કરો';
-    if (fromDate && !toDate) return `${fromDate} → ?`;
-    return `${fromDate} → ${toDate}`;
-  }
+  const cells = buildCalendarDays(eventYear, eventMonth);
 
   // Minimum 5 days hint for hover
   function getMinEnd() {
@@ -151,7 +138,7 @@ export default function DateRangePicker({ fromDate, toDate, onChange }) {
         ) : from ? (
           <span className="drp-range-text drp-partial"><span className="drp-from">{fromDate}</span><span className="drp-arrow">→ ?</span></span>
         ) : (
-          <span className="drp-placeholder">તારીખ પસંદ કરો (min {MIN_DAYS} દિવસ)</span>
+          <span className="drp-placeholder">તારીખ પસંદ કરો (ડિસેમ્બર ૨૦૨૬)</span>
         )}
         <span className="drp-chevron">{open ? '▲' : '▼'}</span>
       </div>
@@ -164,9 +151,9 @@ export default function DateRangePicker({ fromDate, toDate, onChange }) {
 
           <div className="drp-cal">
             <div className="drp-nav">
-              <button type="button" className="drp-nav-btn" onClick={prevMonth}>‹</button>
-              <span className="drp-month-title">{MONTHS_FULL_GU[viewMonth]} {viewYear}</span>
-              <button type="button" className="drp-nav-btn" onClick={nextMonth}>›</button>
+              <button type="button" className="drp-nav-btn" disabled aria-hidden="true">‹</button>
+              <span className="drp-month-title">{MONTHS_FULL_GU[eventMonth]} {eventYear}</span>
+              <button type="button" className="drp-nav-btn" disabled aria-hidden="true">›</button>
             </div>
 
             <div className="drp-grid">
